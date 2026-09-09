@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as MyMeetingsRouteImport } from './routes/my-meetings'
+import { Route as PaymentRouteImport } from './routes/payment'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
 
@@ -30,6 +31,11 @@ const MyMeetingsRoute = MyMeetingsRouteImport.update({
   path: '/my-meetings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaymentRoute = PaymentRouteImport.update({
+  id: '/payment',
+  path: '/payment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SigninRoute = SigninRouteImport.update({
   id: '/signin',
   path: '/signin',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/my-meetings': typeof MyMeetingsRoute
+  '/payment': typeof PaymentRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/my-meetings': typeof MyMeetingsRoute
+  '/payment': typeof PaymentRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
 }
@@ -60,21 +68,23 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/my-meetings': typeof MyMeetingsRoute
+  '/payment': typeof PaymentRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/my-meetings' | '/signin' | '/signup'
+  fullPaths: '/' | '/admin' | '/my-meetings' | '/payment' | '/signin' | '/signup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/my-meetings' | '/signin' | '/signup'
-  id: '__root__' | '/' | '/admin' | '/my-meetings' | '/signin' | '/signup'
+  to: '/' | '/admin' | '/my-meetings' | '/payment' | '/signin' | '/signup'
+  id: '__root__' | '/' | '/admin' | '/my-meetings' | '/payment' | '/signin' | '/signup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   MyMeetingsRoute: typeof MyMeetingsRoute
+  PaymentRoute: typeof PaymentRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
 }
@@ -102,6 +112,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MyMeetingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/payment': {
+      id: '/payment'
+      path: '/payment'
+      fullPath: '/payment'
+      preLoaderRoute: typeof PaymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signin': {
       id: '/signin'
       path: '/signin'
@@ -123,6 +140,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   MyMeetingsRoute: MyMeetingsRoute,
+  PaymentRoute: PaymentRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
 }
