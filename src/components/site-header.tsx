@@ -46,6 +46,7 @@ export function SiteHeader() {
             className="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             Book a meeting
+          </Link>
           <Link
             to="/payment"
             className="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
