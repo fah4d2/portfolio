@@ -1,0 +1,90 @@
+# Base44 dev environment for the Fahad Alazmi portfolio + booking site.
+# Frontend = TanStack Start (Vite dev, SSR). Backend = small Express "bridge"
+# that proxies MongoDB Atlas. The frontend talks to the bridge over the
+# internal docker network (server-to-server), so no public URL/CORS needed.
+#
+# Bring up:  docker compose -f docker-compose.base44.yml up -d --build
+
+# Internal shared secret coordinating the web<->bridge auth. NOT a user
+# credential — generated for this dev environment. Both services must match.
+x-bridge-secret: &bridge-secret "b44-bridge-dev-secret-9f3c7a1e5d2b8e4c6a0f3d7e9b1c5a2f4e8c0d6b2a"
+
+services:
+  # --- one-shot dependency installs (keep node_modules in named volumes) ---
+  web-setup:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - web_node_modules:/app/node_modules
+    command: npm install --no-audit --no-fund
+    restart: "no"
+
+  bridge-setup:
+    image: node:22
+    working_dir: /bridge
+    volumes:
+      - ./bridge:/bridge
+      - bridge_node_modules:/bridge/node_modules
+    command: npm install --no-audit --no-fund
+    restart: "no"
+
+  # --- frontend (TanStack Start dev server) ---
+  web:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - web_node_modules:/app/node_modules
+    # Vite dev with SSR (nitro). Pin the port and bind all interfaces so
+    # the preview proxy can reach it.
+    command: npx vite dev --host 0.0.0.0 --port 3000
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_BRIDGE_URL: http://bridge:8787
+      MONGO_BRIDGE_SECRET: *bridge-secret
+      SESSION_SECRET: *bridge-secret
+      BASE44_PUBLIC_HOST_SUFFIX: ${BASE44_PUBLIC_HOST_SUFFIX}
+      PORT: "3000"
+    env_file:
+      - ./.env.base44-defaults
+      - /run/base44/app.env
+    depends_on:
+      web-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      start_period: 90s
+      retries: 24
+
+  # --- MongoDB data bridge (MONGODB_URI comes from platform secrets) ---
+  bridge:
+    image: node:22
+    working_dir: /bridge
+    volumes:
+      - ./bridge:/bridge
+      - bridge_node_modules:/bridge/node_modules
+    command: node server.js
+    environment:
+      BRIDGE_SECRET: *bridge-secret
+      MONGODB_DB: portfolio
+      PORT: "8787"
+    env_file:
+      - /run/base44/app.env
+    depends_on:
+      bridge-setup:
+        condition: service_completed_successfully
+    restart: on-failure:5
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8787/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      start_period: 15s
+      retries: 6
+
+volumes:
+  web_node_modules:
+  bridge_node_modules:

@@ -1,0 +1,17 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "MONGODB_URI",
+      "description": "MongoDB Atlas connection string used by the bridge/ data service that stores users, bookings and settings.",
+      "requiredAtBoot": true
+    },
+    {
+      "name": "OPENROUTER_API_KEY",
+      "description": "OpenRouter API key that powers the site assistant chatbot (free model). Get it from openrouter.ai → Keys.",
+      "requiredAtBoot": false
+    }
+  ]
+}
